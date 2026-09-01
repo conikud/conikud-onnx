@@ -1,0 +1,26 @@
+[project]
+name = "conikud-onnx"
+version = "0.1.0"
+description = "Hebrew grapheme-to-phoneme (IPA with stress) — ONNX runtime for the Conikud graph reader"
+readme = "README.md"
+authors = [
+    { name = "thewh1teagle", email = "61390950+thewh1teagle@users.noreply.github.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "numpy>=2.5.2",
+    "onnxruntime>=1.29.0",
+    "tokenizers>=0.23.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "onnx>=1.22.0",
+    "safetensors>=0.8.0",
+    "torch>=2.13.0",
+    "transformers>=5.16.1",
+]
