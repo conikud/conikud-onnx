@@ -80,20 +80,4 @@ fetched automatically. To pin your own export, pass a path:
 G2P("conikud_int8.onnx")
 ```
 
-## CLI
-
-```sh
-python -m conikud_onnx "שלום עולם"
-# ʃlˈom ʔolˈam
-
-python -m conikud_onnx --top-k 3 "הוא ספר את הכסף"
-# הוא:  hˈu (1.00), hˈuwi (0.00), hˈa (0.00)
-# ספר:  safˈaʁ (0.62), safˈeʁ (0.25), sapˈaʁ (0.13)
-# את:   ʔˈet (0.99), ʔˈat (0.01), ʔˈit (0.00)
-# הכסף: hakˈesef (0.98), hakˈasef (0.01), hakˈesuf (0.01)
-```
-
-`--json` emits the full `alternatives()` structure, `--model` points at a local
-file, and text is read from stdin when no argument is given.
-
-See [`examples/basic.py`](examples/basic.py).
+See [`examples/basic.py`](examples/basic.py) for a runnable version of the above.
