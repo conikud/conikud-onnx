@@ -21,6 +21,7 @@ import numpy as np
 import onnx
 import onnxruntime as ort
 import regex as re
+from heb_tts_normalizer import normalize as _spoken_form
 from tokenizers import Tokenizer
 
 from .hub import resolve
@@ -191,14 +192,22 @@ class G2P:
             readings.append((self.vocab.render(text, start, end, chunks, stressed), score))
         return readings
 
-    def alternatives(self, text: str, k: int = 5) -> list[dict]:
+    def alternatives(self, text: str, k: int = 5, normalize: bool = False) -> list[dict]:
         """Per-word readings in input order, best first.
 
         -> [{word, start, end, options: [{ipa, score, probability}]}]. `options`
         is empty for tokens with no Hebrew letters. `score` is a summed
         log-probability; `probability` is a softmax over the returned readings,
-        so it sums to 1 per word. Offsets index the normalized text.
+        so it sums to 1 per word.
+
+        `normalize=True` first rewrites numbers, money, dates and units into the
+        words a person would say — otherwise digits reach the
+        model as characters it has no reading for. It rewrites the
+        text, so `word` and the offsets then describe the spoken form rather
+        than what was passed in.
         """
+        if normalize:
+            text = _spoken_form(text)
         text = _normalize(text)
         if not text:
             return []
@@ -218,7 +227,11 @@ class G2P:
             results.append({"word": match.group(), "start": start, "end": end, "options": options})
         return results
 
-    def phonemize(self, text: str) -> str:
-        """Best reading of every word, joined by spaces."""
+    def phonemize(self, text: str, normalize: bool = False) -> str:
+        """Best reading of every word, joined by spaces.
+
+        `normalize=True` speaks numbers, money, dates and units as words first;
+        see :meth:`alternatives`.
+        """
         return " ".join(word["options"][0]["ipa"] if word["options"] else word["word"]
-                        for word in self.alternatives(text, k=1))
+                        for word in self.alternatives(text, k=1, normalize=normalize))

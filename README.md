@@ -26,6 +26,16 @@ g2p.phonemize("קניתי ספר חדש")     # kanˈiti sˈefeʁ χadˈaʃ
 g2p.phonemize("הוא ספר את הכסף")   # hˈu safˈaʁ ʔˈet hakˈesef
 ```
 
+Numbers, money, dates and times are spoken as words with `normalize=True`:
+
+```python
+g2p.phonemize("הכרטיס עלה ₪25 בשעה 14:30", normalize=True)
+# hakaʁtˈis ʔalˈa ʔesʁˈim veχamiʃˈa ʃkalˈim beʃaʔˈa ʃtˈajim vaχˈetsi ʔaχˈaʁ hatsohoʁˈajim
+```
+
+It rewrites the text, so `alternatives()` then reports the spoken words and
+their offsets rather than what you passed in.
+
 ## Alternatives
 
 `alternatives()` keeps each word's competing readings instead of collapsing

@@ -6,22 +6,23 @@ network once and nothing afterwards:
     pip install conikud-onnx
     python examples/basic.py
 
-To use a local export instead — no Hub, no network — download it yourself:
+To use a local export instead — no Hub, no network — download it yourself and
+pass the path to G2P:
 
     wget https://huggingface.co/conikud/conikud-onnx/resolve/main/conikud_int8.onnx
-    python examples/basic.py conikud_int8.onnx
 """
-
-import sys
 
 from conikud_onnx import G2P
 
-g2p = G2P(sys.argv[1] if len(sys.argv) > 1 else None)
+g2p = G2P()
 
 # Hebrew omits vowels, so the same spelling can be several different words.
 # ספר is a book, "he counted", or a barber — only the sentence decides.
 for sentence in ["קניתי ספר חדש", "הוא ספר את הכסף"]:
     print(f"{sentence}  ->  {g2p.phonemize(sentence)}")
+
+# normalize=True speaks numbers, money, dates and times as words.
+print(g2p.phonemize("הכרטיס עלה ₪25 בשעה 14:30", normalize=True))
 
 print()
 

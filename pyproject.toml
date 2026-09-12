@@ -6,8 +6,9 @@ readme = "README.md"
 authors = [
     { name = "thewh1teagle", email = "61390950+thewh1teagle@users.noreply.github.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
+    "heb-tts-normalizer>=0.2.0",
     "huggingface-hub>=0.35.0",
     "numpy>=2.5.2",
     "onnx>=1.22.0",
