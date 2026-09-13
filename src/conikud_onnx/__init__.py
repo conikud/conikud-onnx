@@ -132,7 +132,10 @@ class G2P:
             from transformers import AutoTokenizer
             return AutoTokenizer.from_pretrained(temp).backend_tokenizer
 
-    def _run(self, text: str) -> tuple[np.ndarray, np.ndarray]:
+    _GENDER = {None: 0, "m": 1, "f": 2}
+
+    def _run(self, text: str, speaker: str | None = None,
+             listener: str | None = None) -> tuple[np.ndarray, np.ndarray]:
         """Character-aligned chunk and stress log-probabilities for one sentence."""
         encoded = self.tokenizer.encode(text, add_special_tokens=True)
         if len(encoded.ids) > self.vocab.max_tokens:
@@ -154,8 +157,19 @@ class G2P:
             "char_to_token": np.array([char_to_token], dtype=np.int64),
             "char_positions": np.array([char_positions], dtype=np.int64),
             "word_final": np.array([self.vocab.word_final_positions(text)], dtype=np.int64),
+            **self._gender_feed(speaker, listener),
         })
         return _log_softmax(emissions[0]), _log_softmax(stress[0])
+
+    def _gender_feed(self, speaker: str | None, listener: str | None) -> dict:
+        """Hebrew inflects for the gender of BOTH participants: "m", "f" or None
+        (unknown, which the model reads as no signal rather than a third value)."""
+        feed = {}
+        for name, value in (("speaker", speaker), ("listener", listener)):
+            if value not in self._GENDER:
+                raise ValueError(f"{name}: expected 'm', 'f' or None, got {value!r}")
+            feed[name] = np.array([self._GENDER[value]], dtype=np.int64)
+        return feed
 
     def _readings(self, text: str, start: int, end: int, emissions: np.ndarray,
                   stress: np.ndarray, k: int) -> list[tuple[str, float]]:
@@ -192,7 +206,8 @@ class G2P:
             readings.append((self.vocab.render(text, start, end, chunks, stressed), score))
         return readings
 
-    def alternatives(self, text: str, k: int = 5, normalize: bool = False) -> list[dict]:
+    def alternatives(self, text: str, k: int = 5, normalize: bool = False,
+                     speaker: str | None = None, listener: str | None = None) -> list[dict]:
         """Per-word readings in input order, best first.
 
         -> [{word, start, end, options: [{ipa, score, probability}]}]. `options`
@@ -211,7 +226,7 @@ class G2P:
         text = _normalize(text)
         if not text:
             return []
-        emissions, stress = self._run(text)
+        emissions, stress = self._run(text, speaker, listener)
 
         results = []
         for match in _WORD.finditer(text):
@@ -227,11 +242,13 @@ class G2P:
             results.append({"word": match.group(), "start": start, "end": end, "options": options})
         return results
 
-    def phonemize(self, text: str, normalize: bool = False) -> str:
+    def phonemize(self, text: str, normalize: bool = False,
+                  speaker: str | None = None, listener: str | None = None) -> str:
         """Best reading of every word, joined by spaces.
 
         `normalize=True` speaks numbers, money, dates and units as words first;
         see :meth:`alternatives`.
         """
         return " ".join(word["options"][0]["ipa"] if word["options"] else word["word"]
-                        for word in self.alternatives(text, k=1, normalize=normalize))
+                        for word in self.alternatives(text, k=1, normalize=normalize,
+                                                      speaker=speaker, listener=listener))

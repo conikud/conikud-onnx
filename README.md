@@ -26,6 +26,22 @@ g2p.phonemize("קניתי ספר חדש")     # kanˈiti sˈefeʁ χadˈaʃ
 g2p.phonemize("הוא ספר את הכסף")   # hˈu safˈaʁ ʔˈet hakˈesef
 ```
 
+## Gender
+
+Hebrew inflects for the gender of **both** participants, and the spelling is often
+identical — `לך` is *leχˈa* to a man and *lˈaχ* to a woman. No lexicon fixes this:
+the reading depends on metadata that is not in the text.
+
+```python
+g2p.phonemize("זה שלך", listener="m")   # zˈe ʃelχˈa
+g2p.phonemize("זה שלך", listener="f")   # zˈe ʃelˈaχ
+g2p.phonemize("אני רוצה", speaker="f")  # ʔanˈi ʁotsˈa
+```
+
+`speaker` is who is talking, `listener` who is addressed; both take `"m"`, `"f"`
+or `None`. Omitted means unknown — the model reads that as *no signal*, not as a
+third value, and falls back to inferring gender from context.
+
 Numbers, money, dates and times are spoken as words with `normalize=True`:
 
 ```python
